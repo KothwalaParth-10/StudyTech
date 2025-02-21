@@ -1,0 +1,86 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+html,body{
+  overflow-x: hidden;
+}
+.homepage_bg{
+    background: url("../src/assets/Images/bghome.svg");
+}
+.Instructor-img{
+  box-shadow: -21px -20px 0px -1px rgba(255,255,255,1);
+  -webkit-box-shadow: -21px -20px 0px -1px rgba(255,255,255,1);
+  -moz-box-shadow: -21px -20px 0px -1px rgba(255,255,255,1);
+}
+.bgshadow{
+  box-shadow: 14px 10px 0px 0px rgba(255,243,46,0.75);
+-webkit-box-shadow: 14px 10px 0px 0px rgba(255,243,46,0.75);
+-moz-box-shadow: 14px 10px 0px 0px rgba(255,243,46,0.75);
+}
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 50px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  padding: 6px;
+  background:
+    conic-gradient(from 135deg at top,currentColor 90deg, #0000 0) 0 calc(50% - 4px)/17px 8.5px,
+    radial-gradient(farthest-side at bottom left,#0000 calc(100% - 6px),currentColor calc(100% - 5px) 99%,#0000) top right/50%  50% content-box content-box,
+    radial-gradient(farthest-side at top        ,#0000 calc(100% - 6px),currentColor calc(100% - 5px) 99%,#0000) bottom   /100% 50% content-box content-box;
+  background-repeat: no-repeat;
+  animation: l11 1s infinite linear;
+  color: white;
+}
+@keyframes l11{ 
+  100%{transform: rotate(1turn)}
+}
+/* .backremove{
+   
+} */
+/* Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
