@@ -6,9 +6,10 @@ import { HiOutlineCurrencyRupee } from "react-icons/hi";
 import RequirementField from './RequirementField';
 import IconBtn from "../../../../common/IconBtn"
 import { setCourse, setStep } from "../../../../../slices/courseSlice"
-import { COURSE_STATUS} from "../../../../../utils/constants"
+import { COURSE_STATUS } from "../../../../../utils/constants"
 import toast from 'react-hot-toast';
 import ChipInput from './ChipInput';
+import Upload from './Upload';
 
 function CourseInformationForm() {
     const {
@@ -55,10 +56,10 @@ function CourseInformationForm() {
             currentValues.courseShortDesc !== course.courseDescription ||
             currentValues.coursePrice !== course.price ||
             currentValues.ccourseBenefits !== course.whatYouWillLearn ||
-            //   currentValues.courseTags.toString() !== course.courseName ||
+             currentValues.courseTags.toString() !== course.courseName ||
             currentValues.courseCategory !== course.category._id ||
-            currentValues.courseRequirements !== course.instructions.toString()
-            //  currentValues.courseImage !== course.courseName ||
+            currentValues.courseRequirements !== course.instructions.toString()||
+            currentValues.courseImage !== course.courseName
         ) {
             return true;
         } else {
@@ -110,19 +111,21 @@ function CourseInformationForm() {
         formData.append("courseName", data.courseTitle);
         formData.append("courseDescription", data.courseShortDesc);
         formData.append("price", data.coursePrice);
-        formData.append("whatYouWillLearn", data.courseBenefits);
+        formData.append("tags", JSON.stringify(data.courseTags))
+        formData.append("whatWillYouLearn", data.courseBenefits);
         formData.append("category", data.courseCategory);
         formData.append("instructions", JSON.stringify(data.courseRequirements));
-        // formData.append("courseName", data.courseTitle);
-        // formData.append("courseName", data.courseTitle);
-        formData.append("status",COURSE_STATUS.DRAFT);
+         formData.append("thumbnailImage", data.courseImage)
+        formData.append("status", COURSE_STATUS.DRAFT);
 
         setLoading(true);
         console.log(formData.courseName);
+
+        const result = await addCourseDetails(formData, token);
+        console.log(result);
         
-        const result=await addCourseDetails(formData,token);
-        if(result){
-            setStep(2);
+        if (result) {
+           dispatch(setStep(2));
             dispatch(setCourse(result))
         }
         setLoading(false);
@@ -212,24 +215,25 @@ function CourseInformationForm() {
             </div>
             {/* handling tags */}
             <ChipInput
-            label="Tags"
-            name="courseTags"
-            placeholder="Enter Tags and Press Enter"
-            register={register}
-            setValue={setValue}
-            getValues={getValues}
-            errors={errors}
-        />
+                label="Tags"
+                name="courseTags"
+                placeholder="Enter Tags and Press Enter"
+                register={register}
+                setValue={setValue}
+                getValues={getValues}
+                errors={errors}
+            />
 
             {/* create a componenet for uploading and showing preview of media */}
 
-            {/* <Upload
-               name=
-               label=
-               register={}
-               errors=
-               setValue={}
-             ></Upload> */}
+            <Upload
+                name="courseImage"
+                label="Course Thumbnail"
+                register={register}
+                setValue={setValue}
+                errors={errors}
+                editData={editCourse ? course?.thumbnail : null}
+            />
 
             <div className="flex flex-col space-y-2">
                 <label className="text-sm text-richblack-5">Benefits of the course<sup className="text-pink-200">*</sup></label>

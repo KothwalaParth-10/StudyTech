@@ -4,7 +4,7 @@ import Home from "./pages/Home"
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import Navbar from './pages/Navbar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ForgotPassword from './pages/ForgotPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import UpdatePassword from './pages/UpdatePassword';
@@ -17,13 +17,38 @@ import Cart from './components/core/Dashboard/Cart/index';
 import About from "./pages/About";
 import Dashboard from './pages/Dashboard';
 import EnrolledCourses from './components/core/Dashboard/EnrolledCourses';
-import {ACCOUNT_TYPE} from "./utils/constants"
+import { ACCOUNT_TYPE } from "./utils/constants"
 import { useSelector } from 'react-redux';
 import AddCourse from "./components/core/Dashboard/AddCourse/index"
 import ContactPage from './pages/ContactPage';
+import { apiConnector } from './services/apiconnector';
+import { auth } from "./services/apis"
+import { setUser } from './slices/profileSlice';
+import { setToken } from './slices/authSlice';
 
 function App() {
-  const {user}=useSelector((state)=>state.profile)
+  const { user } = useSelector((state) => state.profile)
+  const { token } = useSelector((state) => state.auth)
+    
+  const checkAuthStatus = async () => {
+    try {
+      const response = await apiConnector("POST", auth.AUTHENTICATION, null, {
+        Authorization: `Bearer ${token}`,
+      });
+      console.log("Response Status:", response?.status);
+      console.log("Response Data:", response?.data); 
+    } catch (error) {
+      console.error("Authentication check failed:", error);
+      if (error.response?.status === 401) {
+        localStorage.clear();
+        setUser(null);
+        setToken(null);
+      }
+    }
+  };
+    if (token) {
+      checkAuthStatus();
+    }
 
   return (
     <div className='w-screen bg-richblack-900 min-h-screen flex flex-col font-inter'>
@@ -42,10 +67,10 @@ function App() {
             <About></About>
           </OpenRoute>
         }></Route>
-          
-          <Route path='/contact' element={
+
+        <Route path='/contact' element={
           <OpenRoute>
-           <ContactPage></ContactPage>
+            <ContactPage></ContactPage>
           </OpenRoute>
         }></Route>
 
@@ -86,28 +111,28 @@ function App() {
             <Setting></Setting>
           }></Route>
 
-        {
-          user?.accountType === ACCOUNT_TYPE.STUDENT &&(
-            <>
-            <Route path='/dashboard/cart' element={
-           <Cart></Cart>
-          }></Route>
-
-          <Route path='/dashboard/enrolled-courses' element={
-            <EnrolledCourses></EnrolledCourses>
-          }></Route>
-            </>
-          )
-        }
           {
-          user?.accountType === ACCOUNT_TYPE.INSTRUCTOR &&(
-            <>
-          <Route path='/dashboard/add-course' element={
-            <AddCourse></AddCourse>
-          }></Route>
-            </>
-          )
-        }
+            user?.accountType === ACCOUNT_TYPE.STUDENT && (
+              <>
+                <Route path='/dashboard/cart' element={
+                  <Cart></Cart>
+                }></Route>
+
+                <Route path='/dashboard/enrolled-courses' element={
+                  <EnrolledCourses></EnrolledCourses>
+                }></Route>
+              </>
+            )
+          }
+          {
+            user?.accountType === ACCOUNT_TYPE.INSTRUCTOR && (
+              <>
+                <Route path='/dashboard/add-course' element={
+                  <AddCourse></AddCourse>
+                }></Route>
+              </>
+            )
+          }
         </Route>
 
 

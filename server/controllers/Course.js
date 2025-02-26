@@ -8,76 +8,65 @@ const { uploaderImageToCloudinary } = require('../utlis/imageUploader')
 //createCourse handler function
 exports.createCourse = async (req, res) => {
     try {
-        const { courseName, courseDescription, price, category } = req.body
+        const{courseName, courseDescription, whatWillYouLearn, price, category,tags,status, instructions} = req.body;
 
-        const thumbnail = req.files.thumbnailImage
-
-        if (!courseDescription || !courseName || !price || !category) {
+        const thumbnail = req.files.thumbnailImage;
+        console.log("Thumbnail in course creation is", thumbnail) 
+        if(!courseName || !courseDescription || !whatWillYouLearn || !price || !category || !thumbnail || !status || !instructions) {
             return res.status(400).json({
-                success: false,
-                message: "All fields are required"
-            })
+                success:false,
+                message:'All fields are required',
+            });
         }
-        //
-        const userId = req.user.id;
-        const instructorDetails = await User.findById(userId)
-        console.log("Instructor Details: ", instructorDetails);
 
-        if (!instructorDetails) {
+        const instructorId = req.user.id;
+
+        const categoryDetails = await Category.findById(category);
+        if(!categoryDetails) {
             return res.status(404).json({
-                success: false,
-                message: "Instructor Details not found",
-            })
+                success:false,
+                message:'Category Details not found',
+            });
         }
 
-        const categoryDetails = await Category.findById(category)
-        if (!categoryDetails) {
-            return res.status(404).json({
-                success: false,
-                message: "Category Details not found",
-            })
-        }
-
-        const thumbnailImage = await uploaderImageToCloudinary(thumbnail, process.env.FOLDER_NAME)
+        const thumbnailImage = await uploaderImageToCloudinary(thumbnail,process.env.FOLDER_NAME);
 
         const newCourse = await Course.create({
             courseName,
-            courseDescription,
-            instructor: instructorDetails._id,
+            description:courseDescription,
+            whatWillYouLearn,
             price,
-            category: categoryDetails._id,
-            thumbnail: thumbnailImage.secure_url
+            thumbnail:thumbnailImage.secure_url,
+            category,
+            instructor:instructorId,
+            tags,
+            status,
+            instructions
         })
 
-        await User.findByIdAndUpdate({ _id: instructorDetails._id }
-            , {
-                $push: {
-                    courses: newCourse._id
-                }
-            }
-            , { new: true })
-
-
-        await Category.findByIdAndUpdate({ _id: categoryDetails._id },
+        await Category.findByIdAndUpdate(category,
             {
                 $push: {
                     course: newCourse._id
                 }
-            },
-            { new: true })
+            })
 
+        await User.findByIdAndUpdate(instructorId, {
+            $push: {
+                courses: newCourse._id
+            }})
+            
         return res.status(200).json({
-            success: true,
-            message: "Course Created Successfully",
-            data: newCourse
-        })
-
+            success:true,
+            message:'Course created successfully',
+            newCourse
+        })    
     } catch (error) {
         console.error(error);
         return res.status(500).json({
-            suceess: false,
-            message: 'Failed to create Course',
-            error: error.message
+            success:false,
+            message:'Failed to create Course',
+            error: error.message,
         })
     }
 }

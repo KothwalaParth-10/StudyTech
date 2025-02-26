@@ -13,7 +13,8 @@ const cors=require('cors');
 const {cloudinaryConnect}=require('./config/cloudinary');
 const fileUpload=require('express-fileupload');
 const dotenv=require("dotenv")
-const {PostAboutinfo}=require("./controllers/About")
+const {PostAboutinfo}=require("./controllers/About");
+const { auth } = require('./middleware/auth');
 
 dotenv.config();
 const PORT=process.env.PORT || 4000;
@@ -39,6 +40,15 @@ app.use("/api/v1/profile",profileRoutes);
 app.use("/api/v1/course",courseRoutes);
 app.use("/api/v1/payment",paymentRoutes);
 app.post('/api/v1/reach/contact',PostAboutinfo)
+app.post('/api/v1', auth, (req, res) => {
+    
+    res.json({
+        success: true,
+        message: "Access granted!",
+        user: req.user, 
+    });
+});
+
 
 //default route
 app.get("/",(req,res)=>{
