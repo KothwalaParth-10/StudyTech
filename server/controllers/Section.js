@@ -1,77 +1,80 @@
 const Section = require('../models/Section')
 const Course = require('../models/Course')
+const SubSection = require("../models/SubSection")
 
 exports.createSection = async (req, res) => {
     try {
-        //data fetch
-        //data validation
-        //create section
-        //update course with section ObjectID
-        //return response
 
-        const { sectionName, courseId } = req.body
+        const { courseId, sectionName } = req.body;
 
-        if (!sectionName || !courseId) {
+        if (!courseId || !sectionName) {
             return res.status(400).json({
                 success: false,
-                message: "missing Properties"
-            })
+                message: 'All fields are required',
+            });
         }
 
-        const newSection = await Section.create({ sectionName })
+        const newSection = await Section.create({ sectionName });
 
-        const updatedCourseDetails = await Course.findByIdAndUpdate(courseId,
-            {
-                $push: { courseContent: newSection._id }
+        const updatedCourse = await Course.findByIdAndUpdate(courseId, {
+            $push: {
+                courseContent: newSection._id
             }
-            , { new: true })
-
-        /*HW populate karvanu chhe course jethi section subsection badhu dekhay*/
+        }, { new: true })
+            .populate({
+                path: "courseContent",
+                populate: {
+                    path: "subSection"
+                }
+            });
 
         return res.status(200).json({
             success: true,
-            message: "Section created Successfully",
-            updatedCourseDetails
+            message: 'Section created successfully',
+            newSection,
+            updatedCourse
         })
     } catch (error) {
+        console.error(error);
         return res.status(500).json({
             success: false,
-            message: "Unable to create Section, please try again",
-            error: error.message
+            message: 'Failed to create Section',
+            error: error.message,
         })
     }
-
 }
 
-exports.updateSection = async (req, res) => {
+
+exports.updateSection = async (req,res) => {
     try {
-        //data input
-        //data validation
-        //update data
-        //return res
+        
+        const {sectionId, sectionName, courseId} = req.body;
 
-        const { sectionName, sectionId } = req.body
-
-        if (!sectionName || !sectionId) {
+        if (!sectionId || !sectionName) {
             return res.status(400).json({
-                success: false,
-                message: "missing Properties"
-            })
+                success:false,
+                message:'All fields are required',
+            });
         }
 
-        const section = await Section.findByIdAndUpdate(sectionId, { sectionName }, { new: true })
-
-
+        const updatedSection = await Section.findByIdAndUpdate(sectionId, {sectionName}, {new:true});
+        const updatedCourse = await Course.findById(courseId)
+          .populate({
+              path:"courseContent",
+              populate: {
+                  path:"subSection"
+              }});
         return res.status(200).json({
-            success: true,
-            message: "Section updated Successfully",
-            section:section
-        })
+            success:true,
+            message:'Section updated successfully',
+            updatedCourse
+        })   
     } catch (error) {
+        console.error(error);
         return res.status(500).json({
-            success: false,
-            message: "Unable to update Section, please try again",
-            error: error.message
+            success:false,
+            message:'Failed to update Section',
+            error: error.message,
         })
     }
 }
@@ -79,23 +82,55 @@ exports.updateSection = async (req, res) => {
 
 exports.deleteSection = async (req, res) => {
     try {
-        const { sectionId ,courseId} = req.body;
-        await Section.findByIdAndDelete(sectionId)
-      const upcourese =await Course.findByIdAndUpdate(courseId,{
-            $pull:{courseContent:sectionId}
-        },{new:true})
-        console.log(upcourese);
-        
+        const { sectionId, courseId } = req.body;
+
+        if (!sectionId || !courseId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Both sectionId and courseId are required',
+            });
+        }
+
+        const sectionDetails = await Section.findById(sectionId);
+        if (!sectionDetails) {
+            return res.status(404).json({
+                success: false,
+                message: 'Section not found',
+            });
+        }
+
+        // Deleting subsections using Promise.all to handle async deletion
+        if (sectionDetails.subSection && sectionDetails.subSection.length > 0) {
+            await Promise.all(sectionDetails.subSection.map(ssid => SubSection.findByIdAndDelete(ssid)));
+        }
+
+        // Delete the section itself
+        await Section.findByIdAndDelete(sectionId);
+
+        // Update the Course by removing the section reference
+        const updatedCourse = await Course.findByIdAndUpdate(
+            courseId,
+            { $pull: { courseContent: sectionId } },
+            { new: true }
+          )
+            .populate({
+              path: "courseContent",
+              populate: {
+                path: "subSection", // Assuming `subSection` is a field inside `Section`
+              },
+            });
+         
         return res.status(200).json({
             success: true,
-            message: "Section deleted Successfully",
-        })
-
+            message: 'Section deleted successfully',
+            updatedCourse,
+        });
     } catch (error) {
+        console.error(error);
         return res.status(500).json({
             success: false,
-            message: "Unable to delete Section, please try again",
-            error: error.message
-        })
+            message: 'Failed to delete section',
+            error: error.message,
+        });
     }
-}
+};
