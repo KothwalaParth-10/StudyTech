@@ -25,19 +25,22 @@ import { apiConnector } from './services/apiconnector';
 import { auth } from "./services/apis"
 import { setUser } from './slices/profileSlice';
 import { setToken } from './slices/authSlice';
+import MyCourses from './components/core/Dashboard/MyCourses';
+import EditCourse from './components/core/Dashboard/EditCourse';
+import Catalog from './pages/Catalog';
 
 function App() {
   const { user } = useSelector((state) => state.profile)
   const { token } = useSelector((state) => state.auth)
-    
-   useEffect(()=>{
+
+  useEffect(() => {
     const checkAuthStatus = async () => {
       try {
         const response = await apiConnector("POST", auth.AUTHENTICATION, null, {
           Authorization: `Bearer ${token}`,
         });
         console.log("Response Status:", response?.status);
-        console.log("Response Data:", response?.data); 
+        console.log("Response Data:", response?.data);
       } catch (error) {
         console.error("Authentication check failed:", error);
         if (error.response?.status === 401) {
@@ -47,16 +50,17 @@ function App() {
         }
       }
     };
-      if (token) {
-        checkAuthStatus();
-      }
-   },[token])
+    if (token) {
+      checkAuthStatus();
+    }
+  }, [token])
 
   return (
     <div className='w-screen bg-richblack-900 min-h-screen flex flex-col font-inter'>
       <Navbar ></Navbar>
       <Routes>
         <Route path='/' element={<Home></Home>}></Route>
+        <Route path='/catalog/:catalogName' element={<Catalog></Catalog>}></Route>
 
         <Route path='/signup' element={
           <OpenRoute>
@@ -131,6 +135,13 @@ function App() {
               <>
                 <Route path='/dashboard/add-course' element={
                   <AddCourse></AddCourse>
+                }></Route>
+
+                <Route path='/dashboard/my-courses' element={
+                  <MyCourses></MyCourses>
+                }></Route>
+                    <Route path='/dashboard/edit-course/:courseId' element={
+                    <EditCourse></EditCourse>
                 }></Route>
               </>
             )
