@@ -28,6 +28,7 @@ import { setToken } from './slices/authSlice';
 import MyCourses from './components/core/Dashboard/MyCourses';
 import EditCourse from './components/core/Dashboard/EditCourse';
 import Catalog from './pages/Catalog';
+import CourseDetails from './pages/CourseDetails';
 
 function App() {
   const { user } = useSelector((state) => state.profile)
@@ -61,6 +62,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Home></Home>}></Route>
         <Route path='/catalog/:catalogName' element={<Catalog></Catalog>}></Route>
+        <Route path='/courses/:courseId' element={<CourseDetails></CourseDetails>}></Route>
 
         <Route path='/signup' element={
           <OpenRoute>
@@ -155,5 +157,4 @@ function App() {
     </div>
   );
 }
-//mega-frontend-1-25min done
 export default App;

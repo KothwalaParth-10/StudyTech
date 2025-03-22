@@ -1,7 +1,6 @@
-const { default: mongoose } = require('mongoose')
-const moongoose=require('mongoose')
+const mongoose=require('mongoose')
 
-const courseSchema=new moongoose.Schema({
+const courseSchema=new mongoose.Schema({
      courseName:{
             type:String
      },
@@ -9,7 +8,7 @@ const courseSchema=new moongoose.Schema({
            type:String
      },
      instructor:{
-        type:moongoose.Schema.Types.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"User",
         required:true
      },
@@ -17,11 +16,11 @@ const courseSchema=new moongoose.Schema({
         type:String,
      },
      courseContent:[{
-        type:moongoose.Schema.Types.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"Section",
      }],
      ratingAndReviews:[{
-        type:moongoose.Schema.Types.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"RatingAndReview",
      }],
      price:{
@@ -31,7 +30,7 @@ const courseSchema=new moongoose.Schema({
         type:String
      },
      category:{
-        type:moongoose.Schema.Types.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"Category",
      },
      studentsEnrolled:[{
@@ -52,9 +51,9 @@ const courseSchema=new moongoose.Schema({
      },
      createdAt:{
       type:Date,
-      default:Date.now(),
+      default:Date.now,
  }
 
 })
 
-module.exports=moongoose.model("Course",courseSchema)
+module.exports=mongoose.model("Course",courseSchema)

@@ -18,13 +18,13 @@ const {CATALOGPAGEDATA_API}=catalogData
          throw new Error("Could not fetch Category page data")
       }
       result=response?.data
-
    }catch(error){
       console.log(error);
       toast.error(error);
       result=error.response?.data     
    }
-   toast.dismiss(toast);
+   
+   toast.dismiss(toastId);
    return result
 }
 
