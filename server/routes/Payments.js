@@ -1,14 +1,16 @@
 const express=require('express');
 const router=express.Router();
 
- const {capturePayment,verifySignature,sendPaymentSuccessEmail}=require("../controllers/Payments");
+ const {capturePayment,verifyPayment,sendPaymentSuccessEmail,razorpay_key}=require("../controllers/Payments");
 
  const {auth,isInstructor,isStudent,isAdmin}=require("../middleware/auth");
 
  router.post("/capturePayment",auth,isStudent,capturePayment);
 
- router.post("/verifySignature",auth,isStudent,verifySignature);
+ router.post("/verifyPayment",auth, isStudent, verifyPayment)
 
  router.post("/sendPaymentSuccessEmail", auth, isStudent,sendPaymentSuccessEmail);
+
+ router.get('/get-razorpay-key',razorpay_key);
 
 module.exports=router

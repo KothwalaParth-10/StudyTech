@@ -16,6 +16,8 @@ function EnrolledCourses() {
     const getEnrolledCourses = async () => {
         try {
             const response = await getUserEnrolledCourses(token);
+           // console.log(response);
+            
             setEnrolledCourses(response);
 
         } catch (error) {
@@ -52,7 +54,7 @@ function EnrolledCourses() {
                             </div>
                             {
                                 enrolledCourses.map((course, i, arr) => {
-                                    <div className={`flex items-center border border-richblack-700 ${i === arr.length - 1 ? "rounded-b-lg" : "rounded-none"
+                                  return (<div className={`flex items-center border border-richblack-700 ${i === arr.length - 1 ? "rounded-b-lg" : "rounded-none"
                                         }`}
                                         key={i}>
                                         <div className="flex w-[45%] cursor-pointer items-center gap-4 px-5 py-3"
@@ -66,7 +68,7 @@ function EnrolledCourses() {
                                             <div className="flex max-w-xs flex-col gap-2">
                                                 <p className="font-semibold">{course.courseName}</p>
                                                 <p className="text-xs text-richblack-300">
-                                                    {course.description.length > 50
+                                                    {course.courseDescription.length > 50
                                                         ? `${course.description.slice(0, 50)}...`
                                                         : course.description}
                                                 </p>
@@ -83,7 +85,7 @@ function EnrolledCourses() {
                                                 isLabelVisible={false}
                                             />
                                         </div>
-                                    </div>
+                                    </div>)
                                 })
                             }
                         </div>

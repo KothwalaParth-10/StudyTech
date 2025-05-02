@@ -10,6 +10,7 @@ import { COURSE_STATUS } from "../../../../../utils/constants"
 import toast from 'react-hot-toast';
 import ChipInput from './ChipInput';
 import Upload from './Upload';
+import { MdNavigateNext } from "react-icons/md"   
 
 function CourseInformationForm() {
     const {
@@ -247,15 +248,17 @@ function CourseInformationForm() {
             </div>
 
             <RequirementField name="courseRequirements" label="Requirements/Instructions" register={register} errors={errors} setValue={setValue} getValues={getValues}></RequirementField>
-            <div>
+            <div className='flex justify-end gap-2'>
                 {
                     editCourse && (
-                        <button onClick={() => dispatch(setStep(2))} className='flex items-center gap-x-2 bg-richblack-300'>
+                        <button onClick={() => dispatch(setStep(2))}  className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 py-[8px] px-[20px] font-semibold text-richblack-900`}  disabled={loading}>
                             Continue Without Saving
                         </button>
                     )
                 }
-                <IconBtn text={!editCourse ? "Next" : "Save Changes"}></IconBtn>
+                <IconBtn  disabled={loading} text={!editCourse ? "Next" : "Save Changes"}>
+                <MdNavigateNext/>
+                </IconBtn>
             </div>
 
         </form>

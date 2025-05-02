@@ -2,6 +2,8 @@ const Profile = require('../models/Profile')
 const User = require('../models/User')
 const Course = require('../models/Course')
 const { uploaderImageToCloudinary } = require("../utlis/imageUploader")
+const { convertSecondsToDuration}=require("../utlis/secToDuration")
+const CourseProgress=require("../models/CourseProgress")
 
 exports.updateProfile = async (req, res) => {
   try {
@@ -152,52 +154,56 @@ exports.updateDp = async (req, res) => {
 exports.getEnrolledCourses = async (req, res) => {
   try {
     const userId = req.user.id
-    let userDetails = await User.findOne({
-      _id: userId,
-    })
-      .populate({
-        path: "courses",
+    let userDetails = await User.findOne({ _id: userId })
+    .populate({
+      path: "courses",
+      populate: {
+        path: "courseContent",
+        model: "Section",
         populate: {
-          path: "courseContent",
-          populate: {
-            path: "subSection",
-          },
-        },
-      })
-      .exec()
-
-    userDetails = userDetails.toObject()
-    var SubsectionLength = 0
-    for (var i = 0; i < userDetails.courses.length; i++) {
-      let totalDurationInSeconds = 0
-      SubsectionLength = 0
-      for (var j = 0; j < userDetails.courses[i].courseContent.length; j++) {
-        totalDurationInSeconds += userDetails.courses[i].courseContent[
-          j
-        ].subSection.reduce((acc, curr) => acc + parseInt(curr.timeDuration), 0)
-        userDetails.courses[i].totalDuration = convertSecondsToDuration(
-          totalDurationInSeconds
-        )
-        SubsectionLength +=
-          userDetails.courses[i].courseContent[j].subSection.length
+          path: "subSection",
+          model: "SubSection"
+        }
       }
-      let courseProgressCount = await CourseProgress.findOne({
-        courseID: userDetails.courses[i]._id,
-        userId: userId,
-      })
-      courseProgressCount = courseProgressCount?.completedVideos.length
-      if (SubsectionLength === 0) {
-        userDetails.courses[i].progressPercentage = 100
-      } else {
-        // To make it up to 2 decimal point
-        const multiplier = Math.pow(10, 2)
-        userDetails.courses[i].progressPercentage =
-          Math.round(
-            (courseProgressCount / SubsectionLength) * 100 * multiplier
-          ) / multiplier
-      }
-    }
-
+    })
+    .exec();
+ // console.log(userDetails);
+    
+   userDetails = userDetails.toObject()
+	  var SubsectionLength = 0
+	  for (var i = 0; i < userDetails.courses.length; i++) {
+		let totalDurationInSeconds = 0
+		SubsectionLength = 0
+		for (var j = 0; j < userDetails.courses[i].courseContent.length; j++) {
+    //  console.log(userDetails.courses[i].courseContent[j]);
+      
+		  totalDurationInSeconds += userDetails.courses[i].courseContent[
+			j
+		  ].subSection.reduce((acc, curr) => acc + parseInt(curr.timeDuration), 0)
+		  userDetails.courses[i].totalDuration = convertSecondsToDuration(
+			totalDurationInSeconds
+		  )
+		  SubsectionLength +=
+			userDetails.courses[i].courseContent[j].subSection.length
+		}
+		let courseProgressCount = await CourseProgress.findOne({
+		  courseID: userDetails.courses[i]._id,
+		  userId: userId,
+		})
+		courseProgressCount = courseProgressCount?.completedVideos.length
+		if (SubsectionLength === 0) {
+		  userDetails.courses[i].progressPercentage = 100
+		} else {
+		  // To make it up to 2 decimal point
+		  const multiplier = Math.pow(10, 2)
+		  userDetails.courses[i].progressPercentage =
+			Math.round(
+			  (courseProgressCount / SubsectionLength) * 100 * multiplier
+			) / multiplier
+		}
+	  }
+    // console.log(userDetails.courses);
+     
     if (!userDetails) {
       return res.status(400).json({
         success: false,

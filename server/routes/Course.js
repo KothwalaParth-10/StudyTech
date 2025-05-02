@@ -14,7 +14,7 @@ const {createRating,getAverageRating,getAllRating,}=require("../controllers/Rati
 const {isAdmin,isInstructor,isStudent,auth}=require("../middleware/auth")
 
 router.post("/getCourseDetails",getCourseDetails)
-
+                                
 router.post("/createCourse",auth,isInstructor,createCourse);
 
 router.post("/addSection",auth,isInstructor,createSection)

@@ -4,6 +4,7 @@ const Category = require('../models/category')
 const User = require('../models/User')
 const Section=require("../models/Section")
 const SubSection=require("../models/SubSection")
+const { convertSecondsToDuration } = require("../utlis/secToDuration")
 
 const { uploaderImageToCloudinary } = require('../utlis/imageUploader')
 
@@ -103,46 +104,107 @@ exports.showAllCourses = async (req, res) => {
     }
 }
 
-exports.getCourseDetails = async (req, res) => {
-    try {
-        const { courseId } = req.body;
+// exports.getCourseDetails = async (req, res) => {
+//     try {
+//         const { courseId } = req.body;
 
-        const courseDetails = await Course.find({ _id: courseId })
-            .populate({
-                path: "instructor",
-                populate: {
-                    path: "additionalDetails"
-                }
-            })
-            .populate("category")
-           // .populate("ratingAndreviews")
-            .populate({
-                path: "courseContent",
-                populate: {
-                    path: "subSection"
-                }
-            }).exec()
-            console.log(courseDetails);
+//         const courseDetails = await Course.find({ _id: courseId })
+//             .populate({
+//                 path: "instructor",
+//                 populate: {
+//                     path: "additionalDetails"
+//                 }
+//             })
+//             .populate("category")
+//            // .populate("ratingAndreviews")
+//             .populate({
+//                 path: "courseContent",
+//                 populate: {
+//                     path: "subSection"
+//                 }
+//             }).exec()
+//             console.log(courseDetails);
             
-        if (!courseDetails) {
+//         if (!courseDetails) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: `Could not find the course with ${courseId}`
+//             })
+//         }
+
+//         return res.status(200).json({
+//             success: true,
+//             message: "Course Details fetched successfully",
+//             data: courseDetails
+//         })
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({
+//             success: false,
+//             message: error.message
+//         })
+//     }
+// }
+                                
+exports.getCourseDetails = async (req, res) => {
+  try {
+    //get id
+    const {courseId} = req.body;
+    //find course details
+    const courseDetails = await Course.findById(courseId)
+                                .populate(
+                                    {
+                                        path:"instructor",
+                                        populate:{
+                                            path:"additionalDetails",
+                                        },
+                                    }
+                                )
+                                .populate("category")
+                                .populate("ratingAndReviews")
+                                .populate({
+                                    path:"courseContent",
+                                    populate:{
+                                        path:"subSection",
+                                        //select: "-videoUrl",
+                                    },
+                                })
+                                .exec();
+
+        //validation
+        if(!courseDetails) {
             return res.status(400).json({
-                success: false,
-                message: `Could not find the course with ${courseId}`
-            })
+                success:false,
+                message:`Could not find the course with ${courseId}`,
+            });
         }
 
+        let totalDurationInSeconds = 0
+    courseDetails.courseContent.forEach((content) => {
+      content.subSection.forEach((subSection) => {
+        const timeDurationInSeconds = parseInt(subSection.timeDuration)
+        totalDurationInSeconds += timeDurationInSeconds
+      })
+    })
+
+    const totalDuration = convertSecondsToDuration(totalDurationInSeconds)
+        //return response
         return res.status(200).json({
-            success: true,
-            message: "Course Details fetched successfully",
-            data: courseDetails
+            success:true,
+            message:"Course Details fetched successfully",
+            data:{courseDetails,
+              totalDuration
+            },
         })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        })
-    }
+
+  }
+  catch(error) {
+      console.log(error);
+      return res.status(500).json({
+          success:false,
+          message:error.message,
+      });
+  }
 }
 
 exports.getInstructorCourses = async (req, res) => {
