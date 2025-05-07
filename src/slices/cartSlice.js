@@ -21,7 +21,8 @@ const cartSlice = createSlice({
                 toast.error("Course present in cart");
                 return
             }
-
+            console.log(course);
+            
             state.cart.push(course);
             state.totalItems++;
             state.total += JSON.parse(course.price);
@@ -42,26 +43,23 @@ const cartSlice = createSlice({
             localStorage.removeItem("total")
             localStorage.removeItem("totalItems")
         },
-        removeFromCart(state, action) {
-            const course = action.payload;
-            const index = state.cart.findIndex((item) => item._id === course._id)
-
-            if (index < 0) {
-                toast.error("Course is not present in cart");
-                return
+        removeFromCart: (state, action) => {
+            const courseId = action.payload
+            const index = state.cart.findIndex((item) => item._id === courseId)
+      
+            if (index >= 0) {
+              // If the course is found in the cart, remove it
+              state.totalItems--
+              state.total -= state.cart[index].price
+              state.cart.splice(index, 1)
+              // Update to localstorage
+              localStorage.setItem("cart", JSON.stringify(state.cart))
+              localStorage.setItem("total", JSON.stringify(state.total))
+              localStorage.setItem("totalItems", JSON.stringify(state.totalItems))
+              // show toast
+              toast.success("Course removed from cart")
             }
-
-            state.cart.splice(index, 1);
-            state.totalItems--;
-            state.total -= JSON.parse(course.price);
-
-            localStorage.setItem("cart", JSON.stringify(state.cart))
-            localStorage.setItem("total", JSON.stringify(state.total))
-            localStorage.setItem("totalItems", JSON.stringify(state.totalItems))
-            // show toast
-            toast.success("Course reomve from the cart")
-
-        }
+          }
 
     }
 })
